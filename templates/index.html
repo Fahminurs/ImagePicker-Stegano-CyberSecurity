@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageCipher - Steganography Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .loader {
+            width: 64px;
+            height: 64px;
+            position: relative;
+            background: #fff;
+            border-radius: 50%;
+            transform: rotate(45deg);
+            animation: loader 2s ease-in-out infinite;
+        }
+        .loader:before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 32px;
+            height: 32px;
+            background: #0891b2;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+        @keyframes loader {
+            0% { box-shadow: 
+                0 0 0 0 rgba(8, 145, 178, 0.6),
+                0 0 0 0 rgba(147, 51, 234, 0.6); }
+            50% { box-shadow: 
+                0 -50px 0 0 rgba(8, 145, 178, 0.6),
+                50px 0 0 0 rgba(147, 51, 234, 0.6),
+                0 50px 0 0 rgba(8, 145, 178, 0.6),
+                -50px 0 0 0 rgba(147, 51, 234, 0.6); }
+            100% { transform: rotate(405deg);
+                box-shadow: 
+                0 0 0 0 rgba(8, 145, 178, 0.6),
+                0 0 0 0 rgba(147, 51, 234, 0.6); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; visibility: visible; }
+            to { opacity: 0; visibility: hidden; }
+        }
+        .fade-out {
+            animation: fadeOut 1s ease-in-out forwards;
+        }
+        .glitch {
+            position: relative;
+            animation: glitch 1s linear infinite;
+        }
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px, 0) skew(0deg); }
+            4%, 60% { transform: translate(-2px, 0) skew(0deg); }
+            62% { transform: translate(0, 0) skew(5deg); }
+        }
+        .glitch:before,
+        .glitch:after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+        }
+        .glitch:before {
+            animation: glitchTop 1s linear infinite;
+            clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+            -webkit-clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+        }
+        @keyframes glitchTop {
+            2%, 64% { transform: translate(2px, -2px); }
+            4%, 60% { transform: translate(-2px, 2px); }
+            62% { transform: translate(13px, -1px) skew(-13deg); }
+        }
+        .glitch:after {
+            animation: glitchBottom 1.5s linear infinite;
+            clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+            -webkit-clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+        }
+        @keyframes glitchBottom {
+            2%, 64% { transform: translate(-2px, 0); }
+            4%, 60% { transform: translate(-2px, 0); }
+            62% { transform: translate(-22px, 5px) skew(21deg); }
+        }
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #0891b2, #7c3aed);
+            border-radius: 4px;
+        }
+        
+        /* Blinking Cursor */
+        .console-cursor::after {
+            content: '_';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Matrix Rain Effect */
+        @keyframes matrix {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+        .matrix-bg {
+            position: absolute;
+            color: #0f0;
+            font-size: 10px;
+            line-height: 1;
+            opacity: 0.1;
+            animation: matrix 10s linear infinite;
+        }
+
+        /* Typewriter Animation */
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid #22d3ee;
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: 
+                typing 4s steps(40, end),
+                blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            0% { width: 0 }
+            50% { width: 100% }
+            75% { width: 100% }
+            100% { width: 0 }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #22d3ee }
+        }
+
+        .typewriter-container {
+            display: inline-block;
+            position: relative;
+        }
+
+        .typewriter-text {
+            position: relative;
+            animation: typewriter-loop 8s infinite;
+        }
+
+        @keyframes typewriter-loop {
+            0%, 100% { width: 0; }
+            20%, 80% { width: 100%; }
+        }
+
+        /* Text Scramble Effect */
+        .text-scramble .dud {
+            opacity: 0.7;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'cyber': ['Orbitron', 'sans-serif'],
+                        'tech': ['Space Grotesk', 'sans-serif'],
+                        'display': ['Rajdhani', 'sans-serif'],
+                    },
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-gray-900 min-h-screen text-white font-tech">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-900">
+        <div class="text-center space-y-6 mb-8">
+            <h1 id="loadingTitle" class="text-6xl font-bold font-cyber bg-gradient-to-r from-cyan-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">ImageCipher</h1>
+            <p class="text-xl font-display text-gray-400 tracking-widest">Where Every Picture Tells a Secret</p>
+        </div>
+        <div class="loader"></div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('loadingScreen').classList.add('fade-out');
+            }, 2000);
+        });
+    </script>
+
+    <!-- Main Tool Section -->
+    <div class="container mx-auto px-4 py-8 relative z-10">
+        <!-- Header with Image and Slogan -->
+        <div class="text-center mb-12">
+            <div class="flex items-center justify-center space-x-3 mb-4">
+                <i class="fas fa-lock-open text-cyan-500 text-4xl"></i>
+                <h1 id="mainTitle" class="text-4xl font-cyber bg-gradient-to-r from-cyan-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">ImageCipher</h1>
+            </div>
+            <div class="typewriter-container">
+                <p class="typewriter-text text-xl font-display text-gray-400 tracking-wider inline-block overflow-hidden whitespace-nowrap border-r-2 border-cyan-400">Where Every Picture Tells a Secret</p>
+            </div>
+        </div>
+
+        <!-- Initialize Text Scramble Effects -->
+        <script>
+            window.addEventListener('load', function() {
+                // Words to cycle through
+                const words = [
+                    'ImageCipher',
+                    'ImageCipher',
+                    'ImageCipher',
+                    'ImageCipher',
+                    'ImageCipher'
+                ];
+                
+                // Loading screen scramble
+                const loadingTitle = document.querySelector('#loadingTitle');
+                const loadingScramble = new TextScramble(loadingTitle);
+                let loadingCounter = 0;
+                
+                // Function to cycle loading screen text
+                const cycleLoadingText = () => {
+                    loadingScramble.setText(words[loadingCounter]).then(() => {
+                        setTimeout(() => {
+                            loadingCounter = (loadingCounter + 1) % words.length;
+                            cycleLoadingText();
+                        }, 3000);
+                    });
+                };
+                
+                // Start loading screen cycle
+                cycleLoadingText();
+                
+                // Main header scramble
+                const mainTitle = document.querySelector('#mainTitle');
+                const mainScramble = new TextScramble(mainTitle);
+                let mainCounter = 0;
+                
+                // Function to cycle main header text
+                const cycleMainText = () => {
+                    mainScramble.setText(words[mainCounter]).then(() => {
+                        setTimeout(() => {
+                            mainCounter = (mainCounter + 1) % words.length;
+                            cycleMainText();
+                        }, 3000);
+                    });
+                };
+                
+                // Start main header cycle after loading screen fades
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('fade-out');
+                    setTimeout(() => {
+                        cycleMainText();
+                    }, 1000);
+                }, 3000);
+            });
+        </script>
+
+        <!-- Main Tool Box -->
+        <div class="max-w-6xl mx-auto">
+            <div class="bg-gray-800/50 backdrop-blur-md rounded-2xl border border-gray-700 p-12 shadow-xl">
+                <!-- Operation Type Selector -->
+                <div class="mb-8">
+                    <label class="block text-gray-400 font-display mb-2">Select Operation</label>
+                    <select id="operationType" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-gray-300 font-display focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
+                        <option value="encrypt">Encrypt Image</option>
+                        <option value="decrypt">Decrypt Image</option>
+                    </select>
+                </div>
+
+           
+
+                <!-- Centered Upload Section -->
+                <div class="max-w-2xl mx-auto mb-8">
+                    <!-- Image Upload Area -->
+                    <div class="mb-8">
+                        <div class="border-2 border-dashed border-gray-700 rounded-xl p-12 text-center hover:border-cyan-500 transition-all cursor-pointer group relative">
+                            <input type="file" id="imageInput" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept="image/*">
+                            <div class="space-y-4">
+                                <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 group-hover:text-cyan-400 transition-all"></i>
+                                <p id="uploadText" class="text-lg text-gray-400 font-display">Drag and drop your image here or click to browse</p>
+                                <p class="text-sm text-gray-500">Supports: JPG, PNG, GIF (Max 10MB)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div id="uploadProgress" class="mb-8 hidden">
+                        <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-cyan-500 to-purple-500 w-0 transition-all duration-300"></div>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-2 font-display text-center">Uploading: <span class="text-cyan-400">0%</span></p>
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div id="previewContainer" class="hidden">
+                        <div class="relative group">
+                            <div class="bg-gray-800/50 rounded-lg h-64 flex items-center justify-center">
+                                <img id="imagePreview" class="max-w-full max-h-64 object-contain rounded-lg" src="" alt="Preview">
+                            </div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-4">
+                                <button id="removeImageBtn" class="bg-red-500/20 hover:bg-red-500/40 text-red-500 px-4 py-2 rounded-lg backdrop-blur-sm border border-red-500/50 transition-all">
+                                    <i class="fas fa-trash-alt mr-2"></i>Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Encryption Key -->
+                <div class="mb-8">
+                    <label class="block text-gray-400 font-display mb-2">Encryption Key</label>
+                    <input type="number" id="encryptionKey" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-gray-300 font-tech focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all" placeholder="Enter numeric key">
+                </div>
+                     <!-- Message Input (Only for Encrypt) -->
+                     <div id="encryptFields" class="mb-8">
+                        <div class="mb-8">
+                            <label class="block text-gray-400 font-display mb-2">Message to Hide</label>
+                            <textarea id="messageInput" rows="3" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-gray-300 font-tech focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all resize-none" placeholder="Enter the message you want to hide in the image"></textarea>
+                        </div>
+                    </div>
+
+                <!-- Submit Button -->
+                <button id="submitBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-cyber py-4 rounded-lg hover:opacity-90 transition-all duration-300 flex items-center justify-center space-x-2 group">
+                    <span id="submitBtnText">Encrypt Image</span>
+                    <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                </button>
+
+                <!-- Console Output Section -->
+                <div id="consoleOutput" class="mt-8 bg-black/50 backdrop-blur-sm rounded-lg border border-cyan-500/30 p-4 font-mono text-sm">
+                    <div class="flex items-center justify-between mb-2 border-b border-cyan-500/20 pb-2">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <span class="text-cyan-500/70 text-xs font-cyber">SYSTEM OUTPUT</span>
+                    </div>
+                    <div class="h-48 overflow-y-auto custom-scrollbar space-y-2" id="consoleOutputText">
+                        <div class="text-green-400">[<span class="text-cyan-400">*</span>] System initialized...</div>
+                        <div class="text-gray-500">[<span class="text-purple-400">+</span>] Waiting for input...</div>
+                    </div>
+                </div>
+
+                <!-- Result Section -->
+                <div id="resultSection" class="mt-8 hidden">
+                    <div class="border border-gray-700 rounded-xl p-6 bg-gray-900/30">
+                        <h3 class="text-xl font-display text-gray-300 mb-4 flex items-center">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            Process Complete
+                        </h3>
+                        <!-- Image Result -->
+                        <div class="space-y-6">
+                            <div id="resultPreview" class="w-full bg-gray-800 rounded-lg overflow-hidden h-64 flex items-center justify-center">
+                                <img id="resultImage" class="max-w-full max-h-64 object-contain" src="" alt="Result">
+                            </div>
+                            
+                            <!-- Metrics Section -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                                    <div class="text-sm text-gray-400 mb-1 font-display">MSE (Mean Square Error)</div>
+                                    <div class="text-xl text-cyan-400 font-cyber" id="mseValue">0.0023</div>
+                                </div>
+                                <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                                    <div class="text-sm text-gray-400 mb-1 font-display">PSNR (Peak Signal-to-Noise Ratio)</div>
+                                    <div class="text-xl text-purple-400 font-cyber" id="psnrValue">44.32 dB</div>
+                                </div>
+                            </div>
+
+                            <!-- Message Result -->
+                            <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                                <div class="text-sm text-gray-400 mb-2 font-display" id="messageTitle">Extracted Message</div>
+                                <div class="bg-black/30 p-4 rounded-lg font-mono text-sm">
+                                    <div class="flex flex-col space-y-2">
+                                        <!-- Original/Encrypted Message -->
+                                        <div class="text-green-400 break-all" id="extractedMessage"></div>
+                                        
+                                        <!-- Message Length -->
+                                        <div class="text-xs text-gray-500 mt-2 flex items-center">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            Message Length: <span id="messageLength" class="text-cyan-400 ml-1">0 </span> characters
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-xs text-yellow-500/80 font-display italic flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    <span id="messageWarning">If the message is incorrect, please verify your Encryption Key</span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex space-x-4">
+                                <button id="downloadBtn" class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 font-display py-2 rounded-lg transition-all flex items-center justify-center space-x-2">
+                                    <i class="fas fa-download"></i>
+                                    <span>Download</span>
+                                </button>
+                                <button id="copyMessageBtn" class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 font-display py-2 rounded-lg transition-all flex items-center justify-center space-x-2">
+                                    <i class="fas fa-copy"></i>
+                                    <span>Copy Message</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Templates -->
+    <div id="successAlert" class="fixed top-4 right-4 bg-green-500/20 border border-green-500/50 text-green-500 px-6 py-4 rounded-lg backdrop-blur-sm hidden transform translate-x-full transition-transform duration-300" style="z-index: 9999;">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-check-circle"></i>
+            <span class="font-display">Operation Successful!</span>
+        </div>
+    </div>
+
+    <div id="errorAlert" class="fixed top-4 right-4 bg-red-500/20 border border-red-500/50 text-red-500 px-6 py-4 rounded-lg backdrop-blur-sm hidden transform translate-x-full transition-transform duration-300" style="z-index: 9999;">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-exclamation-circle"></i>
+            <span class="font-display">Operation Failed!</span>
+        </div>
+    </div>
+
+    <script>
+        // Image Upload Preview
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = uploadProgress.querySelector('div');
+        const progressText = uploadProgress.querySelector('span');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const resultSection = document.getElementById('resultSection');
+
+        // Function to reset the form
+        function resetImageUpload() {
+            imageInput.value = ''; // Clear the file input
+            previewContainer.classList.add('hidden'); // Hide preview
+            uploadProgress.classList.add('hidden'); // Hide progress bar
+            progressBar.style.width = '0%'; // Reset progress bar
+            progressText.textContent = '0%'; // Reset progress text
+            resultSection.classList.add('hidden'); // Hide result section
+            imagePreview.src = ''; // Clear preview image
+        }
+
+        // Remove button click handler
+        removeImageBtn.addEventListener('click', function() {
+            resetImageUpload();
+        });
+
+        imageInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                    resultSection.classList.add('hidden'); // Hide result section when new image is uploaded
+                    
+                    // Simulate upload progress
+                    uploadProgress.classList.remove('hidden');
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 5;
+                        progressBar.style.width = `${progress}%`;
+                        progressText.textContent = `${progress}%`;
+                        
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                uploadProgress.classList.add('hidden');
+                            }, 500);
+                        }
+                    }, 100);
+                }
+                
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Alert Functions
+        function showAlert(type) {
+            const alert = document.getElementById(`${type}Alert`);
+            alert.classList.remove('hidden', 'translate-x-full');
+            setTimeout(() => {
+                alert.classList.add('translate-x-full');
+                setTimeout(() => {
+                    alert.classList.add('hidden');
+                }, 300);
+            }, 3000);
+        }
+
+        // Console Output Functions
+        function addConsoleOutput(text, type = 'info') {
+            const consoleOutput = document.getElementById('consoleOutputText');
+            const div = document.createElement('div');
+            
+            let color, symbol;
+            switch(type) {
+                case 'success':
+                    color = 'text-green-400';
+                    symbol = '*';
+                    break;
+                case 'error':
+                    color = 'text-red-400';
+                    symbol = '!';
+                    break;
+                case 'warning':
+                    color = 'text-yellow-400';
+                    symbol = '?';
+                    break;
+                default:
+                    color = 'text-cyan-400';
+                    symbol = '+';
+            }
+
+            div.className = color;
+            div.innerHTML = `[<span class="text-purple-400">${symbol}</span>] ${text}<span class="console-cursor"></span>`;
+            
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+
+            // Create matrix effect
+            createMatrixEffect();
+        }
+
+        function createMatrixEffect() {
+            const consoleOutput = document.getElementById('consoleOutput');
+            const matrix = document.createElement('div');
+            matrix.className = 'matrix-bg';
+            matrix.style.left = Math.random() * 100 + '%';
+            matrix.textContent = Array(10).fill(0).map(() => 
+                String.fromCharCode(Math.floor(Math.random() * 95) + 33)
+            ).join('');
+            consoleOutput.appendChild(matrix);
+            setTimeout(() => matrix.remove(), 10000);
+        }
+
+        // Operation Type Change Handler
+        const operationType = document.getElementById('operationType');
+        const encryptFields = document.getElementById('encryptFields');
+        const uploadText = document.getElementById('uploadText');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const messageInput = document.getElementById('messageInput');
+
+        operationType.addEventListener('change', function() {
+            const isEncrypt = this.value === 'encrypt';
+            
+            // Show/hide message input for encrypt/decrypt
+            encryptFields.style.display = isEncrypt ? 'block' : 'none';
+            
+            // Update upload text
+            uploadText.textContent = isEncrypt ? 
+                'Drag and drop your image here or click to browse' : 
+                'Drag and drop the image to decrypt or click to browse';
+            
+            // Update button text without scramble effect
+            submitBtnText.textContent = isEncrypt ? 'Encrypt Image' : 'Decrypt Image';
+            
+            // Reset form
+            resetImageUpload();
+            
+            // Add console output
+            addConsoleOutput(`Switched to ${isEncrypt ? 'encryption' : 'decryption'} mode`, 'info');
+        });
+
+        // Update submit button handler
+        document.getElementById('submitBtn').addEventListener('click', async function() {
+            if (!imagePreview.src) {
+                showAlert('error');
+                addConsoleOutput('No image selected. Operation aborted.', 'error');
+                return;
+            }
+
+            const isEncrypt = operationType.value === 'encrypt';
+            
+            if (isEncrypt && !messageInput.value.trim()) {
+                showAlert('error');
+                addConsoleOutput('Please enter a message to hide.', 'error');
+                return;
+            }
+
+            if (!encryptionKey.value) {
+                showAlert('error');
+                addConsoleOutput('Please enter an encryption key.', 'error');
+                return;
+            }
+
+            // Process based on operation type
+            addConsoleOutput(`Initializing image ${isEncrypt ? 'encryption' : 'decryption'}...`, 'info');
+            
+            try {
+                const formData = new FormData();
+                
+                // Get the image file from the input
+                const imageFile = await fetch(imagePreview.src)
+                    .then(r => r.blob())
+                    .then(blobFile => new File([blobFile], "image.png", { type: "image/png" }));
+                
+                formData.append('image', imageFile);
+                formData.append('key', encryptionKey.value);
+                
+                if (isEncrypt) {
+                    formData.append('message', messageInput.value);
+                }
+
+                // Show processing steps
+                addConsoleOutput('Analyzing image structure...', 'info');
+                setTimeout(() => addConsoleOutput(`Applying steganography ${isEncrypt ? 'encryption' : 'decryption'}...`, 'info'), 500);
+
+                // Send request to backend
+                const response = await fetch(isEncrypt ? '/encode' : '/decode', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    addConsoleOutput('Operation completed successfully!', 'success');
+                    showAlert('success');
+                    
+                    // Show result section
+                    document.getElementById('resultSection').classList.remove('hidden');
+                    
+                    // Update image if available
+                    if (result.image) {
+                        document.getElementById('resultImage').src = result.image;
+                    }
+                    
+                    // Show/hide metrics based on operation type
+                    const metricsSection = document.querySelector('.grid.grid-cols-2.gap-4');
+                    metricsSection.style.display = isEncrypt ? 'grid' : 'none';
+                    
+                    if (isEncrypt) {
+                        // Update metrics for encryption if available
+                        if (result.mse !== undefined) {
+                            document.getElementById('mseValue').textContent = result.mse.toFixed(6);
+                        }
+                        if (result.psnr !== undefined) {
+                            document.getElementById('psnrValue').textContent = result.psnr.toFixed(2) + ' dB';
+                        }
+                        // Update message display for encryption
+                        document.getElementById('messageTitle').textContent = 'Encrypted Message';
+                        document.getElementById('messageWarning').textContent = 'This is your encrypted message';
+                        document.getElementById('extractedMessage').textContent = result.encrypted_message || '';
+                        document.getElementById('messageLength').textContent = (result.encrypted_message || '').length;
+                    } else {
+                        // Update for decryption
+                        document.getElementById('messageTitle').textContent = 'Extracted Message';
+                        document.getElementById('messageWarning').textContent = 'If the message is incorrect, please verify your Encryption Key';
+                        document.getElementById('extractedMessage').textContent = result.message || '';
+                        document.getElementById('messageLength').textContent = (result.message || '').length;
+                    }
+                } else {
+                    throw new Error(result.message || 'Operation failed');
+                }
+            } catch (error) {
+                showAlert('error');
+                addConsoleOutput(`Error: ${error.message}`, 'error');
+            }
+        });
+
+        // Copy Message Function
+        const copyMessageBtn = document.getElementById('copyMessageBtn');
+        const extractedMessage = document.getElementById('extractedMessage');
+
+        copyMessageBtn.addEventListener('click', async function() {
+            try {
+                await navigator.clipboard.writeText(extractedMessage.textContent.trim());
+                showAlert('success');
+                addConsoleOutput('Message copied to clipboard!', 'success');
+                
+                // Visual feedback on button
+                this.classList.add('bg-green-600/20', 'text-green-400', 'border', 'border-green-500/50');
+                setTimeout(() => {
+                    this.classList.remove('bg-green-600/20', 'text-green-400', 'border', 'border-green-500/50');
+                }, 1000);
+            } catch (err) {
+                showAlert('error');
+                addConsoleOutput('Failed to copy message!', 'error');
+            }
+        });
+
+        // Download Function
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resultImage = document.getElementById('resultImage');
+
+        downloadBtn.addEventListener('click', function() {
+            try {
+                const link = document.createElement('a');
+                link.download = 'Encocoded_image.png';
+                link.href = resultImage.src;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showAlert('success');
+                addConsoleOutput('Image downloaded successfully!', 'success');
+                
+                // Visual feedback on button
+                this.classList.add('bg-green-600/20', 'text-green-400', 'border', 'border-green-500/50');
+                setTimeout(() => {
+                    this.classList.remove('bg-green-600/20', 'text-green-400', 'border', 'border-green-500/50');
+                }, 1000);
+            } catch (err) {
+                showAlert('error');
+                addConsoleOutput('Failed to download image!', 'error');
+            }
+        });
+
+        // Function to update extracted message display
+        function updateExtractedMessage(message) {
+            const extractedMessage = document.getElementById('extractedMessage');
+            const messageLength = document.getElementById('messageLength');
+            
+            if (!message) {
+                extractedMessage.textContent = 'No message found';
+                messageLength.textContent = '0';
+                return;
+            }
+            
+            // Update message with proper word wrapping
+            extractedMessage.textContent = message;
+            // Update message length
+            messageLength.textContent = message.length;
+            
+            // Show the message container
+            extractedMessage.parentElement.parentElement.style.display = 'block';
+        }
+
+        // Text Scramble Effect
+        class TextScramble {
+            constructor(el) {
+                this.el = el;
+                this.chars = '!<>-_\\/[]{}—=+*^?#_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                this.update = this.update.bind(this);
+            }
+            setText(newText) {
+                const oldText = this.el.innerText;
+                const length = Math.max(oldText.length, newText.length);
+                const promise = new Promise((resolve) => this.resolve = resolve);
+                this.queue = [];
+                for (let i = 0; i < length; i++) {
+                    const from = oldText[i] || '';
+                    const to = newText[i] || '';
+                    const start = Math.floor(Math.random() * 40);
+                    const end = start + Math.floor(Math.random() * 40);
+                    this.queue.push({ from, to, start, end });
+                }
+                cancelAnimationFrame(this.frameRequest);
+                this.frame = 0;
+                this.update();
+                return promise;
+            }
+            update() {
+                let output = '';
+                let complete = 0;
+                for (let i = 0, n = this.queue.length; i < n; i++) {
+                    let { from, to, start, end, char } = this.queue[i];
+                    if (this.frame >= end) {
+                        complete++;
+                        output += to;
+                    } else if (this.frame >= start) {
+                        if (!char || Math.random() < 0.28) {
+                            char = this.randomChar();
+                            this.queue[i].char = char;
+                        }
+                        output += `<span class="dud">${char}</span>`;
+                    } else {
+                        output += from;
+                    }
+                }
+                this.el.innerHTML = output;
+                if (complete === this.queue.length) {
+                    this.resolve();
+                } else {
+                    this.frameRequest = requestAnimationFrame(this.update);
+                    this.frame++;
+                }
+            }
+            randomChar() {
+                return this.chars[Math.floor(Math.random() * this.chars.length)];
+            }
+        }
+
+        // Initialize text scramble effect
+        window.addEventListener('load', function() {
+            // For loading screen title
+            const loadingTitle = document.querySelector('#loadingTitle');
+            const loadingScramble = new TextScramble(loadingTitle);
+            
+            // Array of words to cycle through
+            const words = [
+                'ImageCipher',
+                'ImageCipher',
+                'ImageCipher',
+                'ImageCipher',
+                'ImageCipher'
+            ];
+            
+            let counter = 0;
+            
+            // Function to cycle through words
+            const cycleText = () => {
+                loadingScramble.setText(words[counter]).then(() => {
+                    setTimeout(() => {
+                        counter = (counter + 1) % words.length;
+                        cycleText();
+                    }, 3000); // Change every 3 seconds
+                });
+            };
+            
+            // Start the cycle
+            cycleText();
+
+            // For main header title
+            const mainTitle = document.querySelector('#mainTitle');
+            const mainScramble = new TextScramble(mainTitle);
+            
+            // Start loading screen animation
+            setTimeout(function() {
+                document.getElementById('loadingScreen').classList.add('fade-out');
+                // After loading screen fades, set the main title to ImageCipher
+                setTimeout(() => {
+                    mainScramble.setText('ImageCipher');
+                }, 1000);
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 
