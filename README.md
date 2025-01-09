@@ -1,6 +1,4 @@
-# Flask Hello World
 
-A simple Flask web application that displays "Hello, World!".
 
 ## Setup
 
